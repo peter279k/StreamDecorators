@@ -1,7 +1,7 @@
 <?php
 namespace ZBateson\StreamDecorators;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\StreamWrapper;
 use GuzzleHttp\Psr7\LimitStream;
@@ -14,7 +14,7 @@ use GuzzleHttp\Psr7\CachingStream;
  * @covers ZBateson\StreamDecorators\QuotedPrintableStream
  * @author Zaahid Bateson
  */
-class QuotedPrintableStreamTest extends PHPUnit_Framework_TestCase
+class QuotedPrintableStreamTest extends TestCase
 {
     public function testReadAndRewind()
     {
@@ -180,18 +180,21 @@ class QuotedPrintableStreamTest extends PHPUnit_Framework_TestCase
             $raw = $stream->getContents();
             $arr = explode("\r\n", $raw);
             $this->assertGreaterThan(0, count($arr));
+            $expectedValue = 76;
             for ($x = 0; $x < count($arr); ++$x) {
-                $this->assertLessThanOrEqual(76, strlen($arr[$x]));
+                $this->assertLessThanOrEqual($expectedValue, strlen($arr[$x]));
             }
         }
     }
 
+    /**
+     * @expectedException \RuntimeException
+     */
     public function testSeekUnsopported()
     {
         $stream = Psr7\stream_for(quoted_printable_encode('Sweetest little pie'));
         $test = new QuotedPrintableStream($stream);
         $this->assertFalse($test->isSeekable());
-        $this->setExpectedException('RuntimeException');
         $test->seek(0);
     }
 }
